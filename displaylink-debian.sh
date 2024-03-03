@@ -461,6 +461,16 @@ patchName="displaylink-installer.patch"
 finalPatchPath="$resourcesDir$patchName"
 patch -Np0 $driver_dir/displaylink-driver-${version}/displaylink-installer.sh <$finalPatchPath
 
+# replace the bundled evdi with a new release from upstream, to avoid a problem on newer kernels (6.6+)
+# https://github.com/DisplayLink/evdi/issues/452
+# Unfortunately, the bundled tar (source is in /*) and the github tarball (source is in /evdi-1.14.2/*) are slightly different, so we have to repackage it
+evdi_version="1.14.2"
+wget https://github.com/DisplayLink/evdi/archive/refs/tags/v${evdi_version}.tar.gz
+tar xzf v${evdi_version}.tar.gz
+cd evdi-${evdi_version}
+tar czf ../$driver_dir/displaylink-driver-${version}/evdi.tar.gz * .*
+cd -
+
 # run displaylink install
 echo -e "\nInstalling driver version: $version\n"
 cd $driver_dir/displaylink-driver-${version}
